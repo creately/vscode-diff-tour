@@ -17,7 +17,7 @@
   "categories": ["Other"],
   "activationEvents": ["onStartupFinished", "onView:diffTour.project"],
   "main": "./src/extension.js",
-  "scripts": { "vscode:prepublish": "node scripts/build-runtime.mjs", "package:vsix": "node scripts/package-vsix.mjs", "test:standalone": "node scripts/build-runtime.mjs && node --test test/standalone.test.cjs" },
+  "scripts": { "vscode:prepublish": "node scripts/build-runtime.mjs", "package:vsix": "node scripts/package-vsix.mjs", "test:standalone": "node --test test/runtime-patch.test.mjs && node scripts/build-runtime.mjs && node --test test/standalone.test.cjs" },
   "contributes": {
     "commands": [
       { "command": "diffTour.selectProject", "title": "Diff Tour: Select Git Project" },

@@ -1,7 +1,9 @@
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { patchRuntimeTurns } from './patch-runtime-source.mjs';
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const app = resolve(process.env.CREATELY_AI_REPO || join(packageDir, '..', 'creately-ai'));
@@ -16,7 +18,17 @@ const bun = (...args) => execFileSync('bun', args, { cwd: app, stdio: 'inherit' 
 mkdirSync(join(runtime, 'scanner'), { recursive: true });
 mkdirSync(join(runtime, 'assets'), { recursive: true });
 mkdirSync(join(runtime, 'skills', 'diff-tour'), { recursive: true });
-bun('build', '--compile', join(app, 'packages/diff-tour/bin/diff-tour.ts'), `--outfile=${join(runtime, binary)}`);
+const stage = mkdtempSync(join(tmpdir(), 'vscode-diff-tour-runtime-'));
+try {
+  const stagedTour = join(stage, 'packages', 'diff-tour');
+  cpSync(join(app, 'packages', 'diff-tour'), stagedTour, { recursive: true });
+  symlinkSync(join(app, 'src'), join(stage, 'src'), process.platform === 'win32' ? 'junction' : 'dir');
+  const turns = join(stagedTour, 'src', 'ledger', 'turns.ts');
+  writeFileSync(turns, patchRuntimeTurns(readFileSync(turns, 'utf8')));
+  bun('build', '--compile', join(stagedTour, 'bin', 'diff-tour.ts'), `--outfile=${join(runtime, binary)}`);
+} finally {
+  rmSync(stage, { recursive: true, force: true });
+}
 bun('build', join(scanner, 'index.ts'), '--target=bun', `--outfile=${join(runtime, 'scanner/index.js')}`);
 bun('build', join(scanner, 'cli.ts'), '--target=bun', `--outfile=${join(runtime, 'scanner/cli.js')}`);
 for (const file of ['template.html', 'review.html']) {

@@ -54,6 +54,7 @@ Developers do **not** need `creately-ai`, `rdm`, Bun, or Node checkouts to use i
   - **Leaf**: Side-by-side syntax-highlighted code diff.
 - **Sibling Risk Detection**: Identifies unchanged caller files and sibling functions that likely needed matching updates when APIs or signatures changed.
 - **Turn Trajectory & History**: Replays prompt-by-prompt evolution across multi-agent sessions and manual developer edits.
+- **Crash and Limit Recovery**: Treats an interrupted turn and its same-session continuation as one logical change, so its final diff and diagrams are not split across an empty correction turn.
 - **Turn Diagrams**: Switches on-the-fly between the base system map and semantic views (Database, Class, Sequences).
 
 ---

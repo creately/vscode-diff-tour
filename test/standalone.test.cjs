@@ -53,12 +53,28 @@ test('bundled runtime scans a Git project without source checkout paths', () => 
     run(executable, ['record'], JSON.stringify({ ...hook, hook_event_name: 'Stop', last_assistant_message: 'Added item name.' }));
     const turns = JSON.parse(run(executable, ['turns', '--repo', repo, '--json']));
     assert.equal(turns.filter((turn) => turn.kind === 'turn' && turn.endedAt).length, 1);
+
+    run(executable, ['record'], JSON.stringify({ ...hook, hook_event_name: 'UserPromptSubmit', prompt: 'Add quantity and price.' }));
+    writeFileSync(join(repo, 'src', 'index.ts'), 'export interface Item { id: string; name: string; quantity: number }\n');
+    run(executable, ['record'], JSON.stringify({ ...hook, hook_event_name: 'UserPromptSubmit', prompt: 'continue' }));
+    writeFileSync(join(repo, 'src', 'index.ts'), 'export interface Item { id: string; name: string; quantity: number; price: number }\n');
+    run(executable, ['record'], JSON.stringify({ ...hook, hook_event_name: 'Stop', last_assistant_message: 'Added quantity and price.' }));
+    const recoveredTurns = JSON.parse(run(executable, ['turns', '--repo', repo, '--json'])).filter((turn) => turn.kind === 'turn');
+    assert.equal(recoveredTurns.length, 2);
+    assert.equal(recoveredTurns[1].turn, 2);
+    assert.equal(recoveredTurns[1].recovered, true);
+    assert.equal(recoveredTurns[1].summary, 'Added quantity and price.');
+    assert.deepEqual(recoveredTurns[1].changes.map((change) => change.path), ['src/index.ts']);
+
     run(executable, ['auto-review', '--repo', repo]);
     const automaticReview = join(repo, '.ai-changes', 'review', 'feature');
     assert.ok(existsSync(join(automaticReview, 'index.html')));
     const automaticData = JSON.parse(readFileSync(join(automaticReview, 'index.review.json'), 'utf8'));
-    assert.equal(automaticData.change.trajectory.length, 1);
+    assert.equal(automaticData.change.trajectory.length, 2);
+    assert.equal(automaticData.change.trajectory[1].turn, 2);
+    assert.equal(automaticData.change.trajectory[1].recovered, true);
     assert.ok(automaticData.turnViews.length > 0);
+    assert.ok(automaticData.turnViews.some((turn) => turn.key === 'standalone-test#2' && turn.views.length > 0));
     const antigravityHooks = JSON.parse(run(executable, ['hooks', 'print', '--harness', 'antigravity', '--repo', repo]));
     assert.equal(antigravityHooks['diff-tour'].SessionStart.length, 1);
     assert.equal(antigravityHooks['diff-tour'].PreInvocation.length, 1);
@@ -71,7 +87,7 @@ test('bundled runtime scans a Git project without source checkout paths', () => 
     assert.equal(existsSync(join(repo, '.git', 'creately', 'diff-tour-diagrams.json')), false);
     run(executable, ['diagrams', 'update', '--repo', repo]);
     const turnViews = JSON.parse(readFileSync(join(repo, '.ai-changes', 'review', 'feature', 'turn-views.json'), 'utf8'));
-    assert.equal(turnViews.turns.length, 1);
+    assert.equal(turnViews.turns.length, 2);
     assert.ok(turnViews.turns[0].views.length > 0);
     run('git', ['add', 'src/index.ts']);
     run('git', ['commit', '-m', 'Add item name']);
@@ -85,6 +101,7 @@ test('bundled runtime scans a Git project without source checkout paths', () => 
       title: 'Item name',
       intent: { asked: 'Add an item name.', approach: ['Extend the item contract.'], outcome: 'Items have a name.', sources: [{ session: 'standalone-test', turn: 1 }] },
       steps: [{ id: 's1', title: 'Extend item contract', why: 'Show the added field.', hunks, verdict: 'on_intent', serves: [{ session: 'standalone-test', turn: 1 }], elements }],
+      alignment: { drift: [{ correction: { session: 'standalone-test', turn: 3 }, followed: true, text: 'The continuation completed the interrupted quantity and price change.' }] },
       skipped: [],
     }));
     run(executable, ['review', '--repo', repo, '--base', 'main']);

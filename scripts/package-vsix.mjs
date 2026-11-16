@@ -20,6 +20,5 @@ const platformName = platform() === 'win32' ? 'windows' : 'macos';
 const output = join(packageDir, `vscode-diff-tour-${manifest.version}-${platformName}-${arch()}.vsix`);
 const run = (cwd, ...args) => execFileSync('bun', args, { cwd, stdio: 'inherit', env: process.env });
 
-run(appDir, 'run', 'build:review-viewer');
 run(packageDir, 'x', '--bun', '@vscode/vsce', 'package', '--out', output);
 console.log(`\nCreated ${output}`);
