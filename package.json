@@ -50,7 +50,8 @@
     "configuration": {
       "title": "Diff Tour",
       "properties": {
-        "diffTour.cliPath": { "type": "string", "default": "", "description": "Optional development override for the bundled Diff Tour executable." }
+        "diffTour.cliPath": { "type": "string", "default": "", "description": "Optional development override for the bundled Diff Tour executable." },
+        "diffTour.createlyUrl": { "type": "string", "default": "https://ai.creately.com", "description": "Creately host used for System Design scan handoff." }
       }
     }
   }

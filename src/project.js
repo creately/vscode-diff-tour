@@ -27,7 +27,7 @@ function hooksConfigured(root, agent, cli) {
     if (!existsSync(file) || !existsSync(join(root, '.agents', 'skills', 'diff-tour', 'SKILL.md'))) return false;
     try {
       const config = JSON.parse(readFileSync(file, 'utf8'))['diff-tour'];
-      return config?.enabled !== false && ['PreInvocation', 'Stop'].every(event =>
+      return config?.enabled !== false && ['SessionStart', 'PreInvocation', 'Stop'].every(event =>
         config?.[event]?.some(hook => typeof hook.command === 'string' && hook.command.includes(cli) && hook.command.includes('--harness antigravity')));
     } catch { return false; }
   }
@@ -52,12 +52,13 @@ function projectStatus(root, config, runtimeDir) {
   try { configuredScanner = JSON.parse(readFileSync(settings, 'utf8')).codebaseModule || ''; }
   catch { /* No scanner setting yet. */ }
   const reviewDir = join(root, '.ai-changes', 'review', branch);
+  const antigravityActive = existsSync(join(commonDir, 'creately', 'changes', branch, 'antigravity-heartbeat.json'));
   return {
     root, name: basename(root), branch, paths: found,
     cli: existsSync(found.cli), scanner: existsSync(found.scanner),
     map: existsSync(join(root, '.creately', 'system', 'system.rdm')),
     codex: hooksConfigured(root, 'codex', found.cli), claude: hooksConfigured(root, 'claude', found.cli),
-    antigravity: hooksConfigured(root, 'antigravity', found.cli),
+    antigravity: hooksConfigured(root, 'antigravity', found.cli), antigravityActive,
     configuredScanner, scannerReady: Boolean((configuredScanner && existsSync(configuredScanner)) || (runtimeDir && existsSync(found.scanner))),
     story: existsSync(join(reviewDir, 'story.json')),
     review: existsSync(join(reviewDir, 'index.html')),

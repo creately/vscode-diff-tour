@@ -19,7 +19,7 @@ let workspaceState;
 
 function config() {
   const settings = vscode.workspace.getConfiguration('diffTour');
-  return { cliPath: settings.get('cliPath', '') };
+  return { cliPath: settings.get('cliPath', ''), createlyUrl: settings.get('createlyUrl', 'https://ai.creately.com') };
 }
 
 function roots() {
@@ -72,7 +72,8 @@ async function refresh() {
       catch (cause) { output.appendLine(`Status refresh: ${cause.message}`); }
     }
     tree.setState(p, completed.length, error, serviceState);
-    statusBar.text = error ? '$(warning) Diff Tour: Error' : !p.map || !(p.codex || p.claude || p.antigravity) || !p.scannerReady ? '$(circle-outline) Diff Tour: Setup needed' : p.review ? '$(check) Diff Tour: Ready' : '$(sync) Diff Tour: Preparing review';
+    const captureReady = p.codex || p.claude || (p.antigravity && p.antigravityActive);
+    statusBar.text = error ? '$(warning) Diff Tour: Error' : !p.map || !captureReady || !p.scannerReady ? '$(circle-outline) Diff Tour: Setup needed' : p.review ? '$(check) Diff Tour: Ready' : '$(sync) Diff Tour: Preparing review';
     statusBar.tooltip = error || `${p.name} / ${p.branch} · ${completed.length} completed turns`;
     statusBar.show();
   } catch (cause) {
@@ -110,7 +111,7 @@ function ensureDashboard(p) {
   dashboardRoot = p.root;
   dashboardKey = randomBytes(32).toString('hex');
   const source = p.paths.cli.endsWith('.ts');
-  dashboard = spawn(source ? 'bun' : p.paths.cli, [...(source ? [p.paths.cli] : []), 'start', '--repo', p.root, '--no-open'], { cwd: p.root, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, DIFF_TOUR_EXTENSION_KEY: dashboardKey } });
+  dashboard = spawn(source ? 'bun' : p.paths.cli, [...(source ? [p.paths.cli] : []), 'start', '--repo', p.root, '--creately-url', config().createlyUrl, '--no-open'], { cwd: p.root, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, DIFF_TOUR_EXTENSION_KEY: dashboardKey } });
   const child = dashboard;
   let stdout = '';
   dashboardReady = new Promise((resolve, reject) => {
@@ -201,7 +202,7 @@ async function scanRepo() {
 
 async function connectCreately() {
   const p = await project(); if (!p) return;
-  const url = await input(p, 'createlyUrl', 'Creately host URL', 'http://localhost:5174', value => { try { return new URL(value).origin === value.replace(/\/$/, '') ? null : 'Enter a host URL'; } catch { return 'Enter a valid URL'; } });
+  const url = await input(p, 'createlyUrl', 'Creately host URL', config().createlyUrl, value => { try { return new URL(value).origin === value.replace(/\/$/, '') ? null : 'Enter a host URL'; } catch { return 'Enter a valid URL'; } });
   if (!url) return;
   const result = await serviceAction('api/connect', { url }, 'Connecting to Creately');
   if (result?.url) await vscode.env.openExternal(vscode.Uri.parse(result.url));
@@ -239,7 +240,7 @@ class ProjectTree {
     this.items = [
       item(`${p.name} / ${p.branch}`, 'Git project'),
       item('System map', p.map ? 'Ready' : 'Needs setup'),
-      item('Agent capture', ['Codex', 'Claude', 'Antigravity'].filter((_, index) => [p.codex, p.claude, p.antigravity][index]).join(' + ') || 'Needs setup'),
+      item('Agent capture', ['Codex', 'Claude', p.antigravity ? p.antigravityActive ? 'Antigravity' : 'Antigravity (reload required)' : ''].filter(Boolean).join(' + ') || 'Needs setup'),
       item('Completed turns', String(count)),
       item('Local review', p.review ? 'Ready' : 'Waiting for a completed prompt'),
       item('Creately', serviceState?.connected ? 'Connected' : 'Not connected'),
