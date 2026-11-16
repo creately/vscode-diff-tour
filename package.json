@@ -1,0 +1,57 @@
+{
+  "name": "vscode-diff-tour",
+  "displayName": "Diff Tour",
+  "description": "Local Diff Tour setup and review companion",
+  "version": "0.1.0",
+  "license": "MIT",
+  "publisher": "creately",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/creately/vscode-diff-tour"
+  },
+  "homepage": "https://github.com/creately/vscode-diff-tour#readme",
+  "bugs": {
+    "url": "https://github.com/creately/vscode-diff-tour/issues"
+  },
+  "engines": { "vscode": "^1.80.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished", "onView:diffTour.project"],
+  "main": "./src/extension.js",
+  "scripts": { "vscode:prepublish": "node scripts/build-runtime.mjs", "package:vsix": "node scripts/package-vsix.mjs", "test:standalone": "node scripts/build-runtime.mjs && node --test test/standalone.test.cjs" },
+  "contributes": {
+    "commands": [
+      { "command": "diffTour.selectProject", "title": "Diff Tour: Select Git Project" },
+      { "command": "diffTour.refresh", "title": "Diff Tour: Refresh Status" },
+      { "command": "diffTour.openDashboard", "title": "Diff Tour: Open Dashboard in Browser", "icon": "$(link-external)" },
+      { "command": "diffTour.showTurns", "title": "Diff Tour: Show Completed Turns" },
+      { "command": "diffTour.refreshReview", "title": "Diff Tour: Refresh Local Review", "icon": "$(refresh)" },
+      { "command": "diffTour.openReview", "title": "Diff Tour: Open Local Review", "icon": "$(open-preview)" },
+      { "command": "diffTour.actions", "title": "Diff Tour: Actions", "icon": "$(ellipsis)" },
+      { "command": "diffTour.setupMap", "title": "Diff Tour: Propose System Map" },
+      { "command": "diffTour.addCodex", "title": "Diff Tour: Add Codex Hooks" },
+      { "command": "diffTour.addClaude", "title": "Diff Tour: Add Claude Hooks" },
+      { "command": "diffTour.addAntigravity", "title": "Diff Tour: Add Antigravity Hooks and Skill" },
+      { "command": "diffTour.connectCreately", "title": "Diff Tour: Connect to Creately" },
+      { "command": "diffTour.scanRepo", "title": "Diff Tour: Scan Repository" },
+      { "command": "diffTour.sendScan", "title": "Diff Tour: Send Scan to Creately" },
+      { "command": "diffTour.openImport", "title": "Diff Tour: Review Import in Creately" }
+    ],
+    "viewsContainers": {
+      "activitybar": [{ "id": "diffTour", "title": "Diff Tour", "icon": "media/diff-tour.svg" }]
+    },
+    "views": { "diffTour": [{ "id": "diffTour.project", "name": "Project" }] },
+    "viewsWelcome": [{ "view": "diffTour.project", "contents": "Open a Git project to start Diff Tour.\n[Open Folder](command:vscode.openFolder)" }],
+    "menus": { "view/title": [
+      { "command": "diffTour.openDashboard", "when": "view == diffTour.project", "group": "navigation@1" },
+      { "command": "diffTour.openReview", "when": "view == diffTour.project", "group": "navigation@2" },
+      { "command": "diffTour.refreshReview", "when": "view == diffTour.project", "group": "navigation@3" },
+      { "command": "diffTour.actions", "when": "view == diffTour.project", "group": "navigation@4" }
+    ] },
+    "configuration": {
+      "title": "Diff Tour",
+      "properties": {
+        "diffTour.cliPath": { "type": "string", "default": "", "description": "Optional development override for the bundled Diff Tour executable." }
+      }
+    }
+  }
+}
