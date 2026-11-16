@@ -77,10 +77,13 @@ cd vscode-diff-tour
 bun run package:vsix
 ```
 
-If `rdm` is located elsewhere, point to it explicitly:
+If either source repository is located elsewhere, point to it explicitly:
 ```bash
-RDM_REPO="/path/to/rdm" bun run package:vsix
+CREATELY_AI_REPO="/path/to/creately-ai" RDM_REPO="/path/to/rdm" bun run package:vsix
 ```
+
+The installed extension defaults System Design handoff to `https://ai.creately.com`.
+Set `diffTour.createlyUrl` in VS Code settings when testing another Creately host.
 
 Install the newly built `.vsix`:
 ```bash

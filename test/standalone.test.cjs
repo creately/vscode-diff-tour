@@ -60,12 +60,14 @@ test('bundled runtime scans a Git project without source checkout paths', () => 
     assert.equal(automaticData.change.trajectory.length, 1);
     assert.ok(automaticData.turnViews.length > 0);
     const antigravityHooks = JSON.parse(run(executable, ['hooks', 'print', '--harness', 'antigravity', '--repo', repo]));
+    assert.equal(antigravityHooks['diff-tour'].SessionStart.length, 1);
     assert.equal(antigravityHooks['diff-tour'].PreInvocation.length, 1);
     assert.equal(antigravityHooks['diff-tour'].Stop.length, 1);
     mkdirSync(join(repo, '.agents', 'skills', 'diff-tour'), { recursive: true });
     writeFileSync(join(repo, '.agents', 'hooks.json'), JSON.stringify(antigravityHooks));
     copyFileSync(join(runtime, 'skills', 'diff-tour', 'SKILL.md'), join(repo, '.agents', 'skills', 'diff-tour', 'SKILL.md'));
     assert.equal(projectStatus(repo, {}, runtime).antigravity, true);
+    assert.equal(projectStatus(repo, {}, runtime).antigravityActive, false);
     assert.equal(existsSync(join(repo, '.git', 'creately', 'diff-tour-diagrams.json')), false);
     run(executable, ['diagrams', 'update', '--repo', repo]);
     const turnViews = JSON.parse(readFileSync(join(repo, '.ai-changes', 'review', 'feature', 'turn-views.json'), 'utf8'));
@@ -90,10 +92,12 @@ test('bundled runtime scans a Git project without source checkout paths', () => 
     assert.ok(existsSync(join(reviewDir, 'review-viewer.iife.js')));
     const antigravityRecord = (event, input) => run(executable, ['record', '--harness', 'antigravity', '--event', event, '--repo', repo], JSON.stringify(input));
     const antigravityInput = { conversationId: 'antigravity-test', lastUserInput: 'Add a quantity.' };
+    antigravityRecord('SessionStart', { conversationId: 'antigravity-test' });
+    assert.equal(projectStatus(repo, {}, runtime).antigravityActive, true);
     antigravityRecord('PreInvocation', antigravityInput);
     antigravityRecord('PreInvocation', antigravityInput);
     writeFileSync(join(repo, 'src', 'index.ts'), 'export interface Item { id: string; name: string; quantity: number }\n');
-    assert.equal(JSON.parse(antigravityRecord('Stop', { ...antigravityInput, fullyIdle: true })).decision, 'stop');
+    assert.equal(JSON.parse(antigravityRecord('Stop', { ...antigravityInput, fullyIdle: true })).decision, 'continue');
     const antigravityTurns = JSON.parse(run(executable, ['turns', '--repo', repo, '--json']));
     assert.equal(antigravityTurns.filter((turn) => turn.kind === 'turn' && turn.session === 'antigravity-test' && turn.endedAt).length, 1);
   } finally {

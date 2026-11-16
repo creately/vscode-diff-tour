@@ -4,12 +4,13 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const app = resolve(packageDir, '..', '..');
+const app = resolve(process.env.CREATELY_AI_REPO || join(packageDir, '..', 'creately-ai'));
 const rdm = resolve(process.env.RDM_REPO || join(app, '..', 'rdm'));
 const scanner = join(rdm, 'packages', 'rdm-codebase', 'src');
 const runtime = join(packageDir, 'runtime');
 const binary = process.platform === 'win32' ? 'diff-tour.exe' : 'diff-tour';
 
+if (!existsSync(join(app, 'packages', 'diff-tour', 'bin', 'diff-tour.ts'))) throw new Error(`Diff Tour source not found at ${app}. Set CREATELY_AI_REPO for this build.`);
 if (!existsSync(join(scanner, 'index.ts'))) throw new Error(`RDM scanner source not found at ${scanner}. Set RDM_REPO for this build.`);
 const bun = (...args) => execFileSync('bun', args, { cwd: app, stdio: 'inherit' });
 mkdirSync(join(runtime, 'scanner'), { recursive: true });
