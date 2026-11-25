@@ -8,7 +8,7 @@ Download a prebuilt VSIX from the [latest GitHub Release](https://github.com/cre
 
 Available build:
 
-- macOS Apple Silicon: `vscode-diff-tour-0.1.3-macos-arm64.vsix`
+- macOS Apple Silicon: `vscode-diff-tour-0.1.4-macos-arm64.vsix`
 
 Release assets are platform-specific because the extension contains a native Diff Tour executable. Do not install an asset built for another operating system or architecture.
 
@@ -24,7 +24,7 @@ In VS Code:
 Or use the command line:
 
 ```bash
-code --install-extension /path/to/vscode-diff-tour-0.1.3-macos-arm64.vsix --force
+code --install-extension /path/to/vscode-diff-tour-0.1.4-macos-arm64.vsix --force
 ```
 
 ## Start
