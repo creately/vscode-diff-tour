@@ -8,7 +8,7 @@ Download a prebuilt VSIX from the [latest GitHub Release](https://github.com/cre
 
 Available build:
 
-- macOS Apple Silicon: `vscode-diff-tour-0.1.4-macos-arm64.vsix`
+- macOS Apple Silicon: `vscode-diff-tour-0.1.5-macos-arm64.vsix`
 
 Release assets are platform-specific because the extension contains a native Diff Tour executable. Do not install an asset built for another operating system or architecture.
 
@@ -24,16 +24,18 @@ In VS Code:
 Or use the command line:
 
 ```bash
-code --install-extension /path/to/vscode-diff-tour-0.1.4-macos-arm64.vsix --force
+code --install-extension /path/to/vscode-diff-tour-0.1.5-macos-arm64.vsix --force
 ```
 
 ## Start
 
 1. Open a Git repository in VS Code.
 2. Run **Diff Tour: Open Dashboard in Browser**.
-3. Select **Add Codex** and trust the project hooks and configuration in Codex.
-4. Start a new Codex chat for the repository.
-5. Develop normally. For code-changing tasks, Codex calls Diff Tour before its final response and embeds the generated review in the chat.
+3. Select **Add Codex**, **Add Claude**, or **Add Antigravity** for the agent you use, then trust its project hooks and MCP configuration.
+4. Reload the agent and start a new chat for the repository.
+5. Develop normally. For code-changing tasks, the agent calls Diff Tour before its final response and embeds the generated review in compatible MCP App clients.
+
+Claude Code and Codex use their repository-local MCP configurations. Claude Desktop can render the same MCP App after its local Diff Tour server is configured. Antigravity App requires v2.34 or later for inline MCP Apps; Antigravity IDE and CLI retain the plain-text result and browser-review fallback.
 
 The browser dashboard remains available for setup, manual review refresh, and optional Creately System Design handoff.
 
