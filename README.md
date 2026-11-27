@@ -6,9 +6,9 @@ Diff Tour captures AI coding-agent prompts and presents each completed code-chan
 
 Download a prebuilt VSIX from the [latest GitHub Release](https://github.com/creately/vscode-diff-tour/releases/latest).
 
-Available preview build:
+Available build:
 
-- macOS Apple Silicon: `vscode-diff-tour-0.1.1-macos-arm64.vsix`
+- macOS Apple Silicon: `vscode-diff-tour-0.1.7-macos-arm64.vsix`
 
 Release assets are platform-specific because the extension contains a native Diff Tour executable. Do not install an asset built for another operating system or architecture.
 
@@ -24,16 +24,20 @@ In VS Code:
 Or use the command line:
 
 ```bash
-code --install-extension /path/to/vscode-diff-tour-0.1.1-macos-arm64.vsix --force
+code --install-extension /path/to/vscode-diff-tour-0.1.7-macos-arm64.vsix --force
 ```
 
 ## Start
 
 1. Open a Git repository in VS Code.
 2. Run **Diff Tour: Open Dashboard in Browser**.
-3. Add hooks for Codex, Claude, or Google Antigravity.
-4. Develop normally with the selected agent.
-5. Use **Open review** after a completed prompt to inspect the turn.
+3. Select **Add Codex**, **Add Claude**, or **Add Antigravity** for the agent you use, then trust its project hooks and MCP configuration.
+4. Reload the agent and start a new chat for the repository.
+5. Develop normally. For code-changing tasks, the agent calls Diff Tour before its final response and embeds the generated review in compatible MCP App clients.
+
+Claude Code and Codex use their repository-local MCP configurations. Claude Desktop can render the same MCP App after its local Diff Tour server is configured; 0.1.7 supplies MCP initialization instructions asking compatible hosts to complete and display the review automatically after code-changing tasks, and retains the read-only resource fallback for hosts that omit tool-result metadata. MCP tool invocation remains controlled by the host and model. Antigravity App requires v2.34 or later for inline MCP Apps; Antigravity IDE and CLI retain the plain-text result and browser-review fallback.
+
+The browser dashboard remains available for setup, manual review refresh, and optional Creately System Design handoff.
 
 The extension defaults Creately System Design handoff to `https://ai.creately.com`. Change `diffTour.createlyUrl` in VS Code settings only when testing another Creately host.
 
